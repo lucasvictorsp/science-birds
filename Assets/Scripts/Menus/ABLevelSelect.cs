@@ -40,8 +40,9 @@ public class ABLevelSelect : ABMenu {
 
 		// Load levels in the resources folder
 		TextAsset []levelsData = Resources.LoadAll<TextAsset>(ABConstants.DEFAULT_LEVELS_FOLDER);
+        string[] levelFiles_0 = Directory.GetFiles("Assets/Resources/" + ABConstants.DEFAULT_LEVELS_FOLDER, "*.xml");
 
-		string[] resourcesXml = new string[levelsData.Length];
+        string[] resourcesXml = new string[levelsData.Length];
 		for (int i = 0; i < levelsData.Length; i++)
 			resourcesXml [i] = levelsData[i].text;
 
@@ -70,7 +71,15 @@ public class ABLevelSelect : ABMenu {
 		_startPos.x = Mathf.Clamp (_startPos.x, 0, 1f) * Screen.width;
 		_startPos.y = Mathf.Clamp (_startPos.y, 0, 1f) * Screen.height;
 
-		LevelList.Instance.LoadLevelsFromSource (allXmlFiles);
+        string[] levelFiles_1 = new string[levelFiles_0.Length + levelFiles.Length];
+
+        for (int i = 0; i < levelFiles_0.Length; i++)
+            levelFiles_1[i] = levelFiles_0[i];
+
+        for(int i = 0, cont = levelFiles_0.Length; i < levelFiles.Length; i++, cont++)
+            levelFiles_1[cont] = levelFiles[i];
+
+        LevelList.Instance.LoadLevelsFromSource(allXmlFiles, levelFiles_1);
 
 		int j = 0;
 

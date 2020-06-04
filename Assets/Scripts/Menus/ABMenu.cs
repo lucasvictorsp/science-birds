@@ -22,13 +22,30 @@ using System.Collections;
 
 public class ABMenu : MonoBehaviour {
 
-	public void LoadNextScene(string sceneName) {
+    public static int cont;
+    public static bool flag =  true;
 
-		ABSceneManager.Instance.LoadScene(sceneName);
-	}
+    void Awake() {
+        cont = 0;
+    }
 
-	public void LoadNextScene(string sceneName, bool loadTransition, ABSceneManager.ActionBetweenScenes action) {
+    public void LoadNextScene(string sceneName) {
+        //Debug.Log("1111 ----> sceneName = " + sceneName);
+        ABSceneManager.Instance.LoadScene(sceneName);
+    }
 
-		ABSceneManager.Instance.LoadScene(sceneName, loadTransition, action);
-	}
+    public void LoadNextScene(string sceneName, bool loadTransition, ABSceneManager.ActionBetweenScenes action){
+        //Debug.Log("2222 --> sceneName = " + sceneName + ", loadTransition = " + loadTransition + ", action = " + action);
+        ABSceneManager.Instance.LoadScene(sceneName, loadTransition, action);
+    }
+
+    /*void Update() {
+        if(flag){
+            flag = false;
+            LoadNextScene("LevelSelectMenu");
+        }// else {
+         //   ABSceneManager.Instance.LoadScene("GameWorld", true, "ABSceneManager+ActionBetweenScenes");
+        //}
+        //LoadNextScene("LevelSelectMenu");
+    }//*/
 }

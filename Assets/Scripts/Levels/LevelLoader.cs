@@ -23,10 +23,12 @@ using System.IO;
 using System.Xml;
 using System.Text;
 using System.Collections.Generic;
+using System.Globalization;
 
 public class LevelLoader {
-	
-	public static string ReadXmlLevel(string path) {
+    private static double avarage;
+
+    public static string ReadXmlLevel(string path) {
 	
 		string xmlText = "";
 
@@ -47,60 +49,66 @@ public class LevelLoader {
 		return xmlText;
 	}
 	
-	public static ABLevel LoadXmlLevel(string xmlString) {
+	public static ABLevel LoadXmlLevel(string xmlString, string nameXML = "") {
+        CultureInfo ci = (CultureInfo)CultureInfo.CurrentCulture.Clone();
+        ci.NumberFormat.CurrencyDecimalSeparator = ".";
 
-		ABLevel level = new ABLevel();
+        ABLevel level = new ABLevel();
 
-		using (XmlReader reader = XmlReader.Create(new StringReader(xmlString)))
-		{
+        using (XmlReader reader = XmlReader.Create(new StringReader(xmlString))) {
+            if (nameXML != "") {
+                //    level.name = nameXML.Replace(Application.dataPath + "/Resources/UFMG/LevelsUFMG/", "");
+                //    level.name = nameXML.Replace("G:/Nivel_Unity/Teste/", "");
+                //	  level.name = nameXML.Replace(G:/Nivel_Unity/Nivel_Model_Angle/", "");
+                level.name = nameXML;
+            }
+
+            //Debug.Log("level.name = " + level.name);
 			reader.ReadToFollowing("Level");
 
 			level.width = 1;
-			if (reader.GetAttribute ("width") != null) {
-
+            if (reader.GetAttribute ("width") != null) {
 				reader.MoveToAttribute("width");
 				level.width = (int)Convert.ToInt32 (reader.Value);
-			}
+            }
 
 			reader.ReadToFollowing("Camera");
 
 			reader.MoveToAttribute("x");
-			level.camera.x = (float)Convert.ToDouble (reader.Value);
+            level.camera.x = float.Parse(reader.Value, NumberStyles.Any, ci);
 
-			reader.MoveToAttribute("y");
-			level.camera.y = (float)Convert.ToDouble (reader.Value);
+            reader.MoveToAttribute("y");
+            level.camera.y = float.Parse(reader.Value, NumberStyles.Any, ci);
 
-			reader.MoveToAttribute("minWidth");
-			level.camera.minWidth = (float)Convert.ToDouble (reader.Value);
+            reader.MoveToAttribute("minWidth");
+			level.camera.minWidth = float.Parse(reader.Value, NumberStyles.Any, ci);
 
-			reader.MoveToAttribute("maxWidth");
-			level.camera.maxWidth = (float)Convert.ToDouble (reader.Value);
-				
-			reader.ReadToFollowing("Birds");
+            reader.MoveToAttribute("maxWidth");
+			level.camera.maxWidth = float.Parse(reader.Value, NumberStyles.Any, ci);
+
+            reader.ReadToFollowing("Birds");
 			reader.Read ();
 
 			while (reader.Read ()) {
-
 				string nodeName = reader.LocalName;
 				if (nodeName == "Birds")
 					break;
 
 				reader.MoveToAttribute("type");
 				string type = reader.Value;
-
-				level.birds.Add (new BirdData (type));
+                level.birds.Add (new BirdData (type));
 				reader.Read ();
 			}
 
 			reader.ReadToFollowing("Slingshot");
 
 			reader.MoveToAttribute("x");
-			level.slingshot.x = (float)Convert.ToDouble (reader.Value);
+            level.slingshot.x = float.Parse(reader.Value, NumberStyles.Any, ci);
 
-			reader.MoveToAttribute("y");
-			level.slingshot.y = (float)Convert.ToDouble (reader.Value);
+            reader.MoveToAttribute("y");
+            level.slingshot.y = float.Parse(reader.Value, NumberStyles.Any, ci);
 
-			reader.ReadToFollowing("GameObjects");
+            reader.ReadToFollowing("GameObjects");
 			reader.Read ();
 
 			while (reader.Read())
@@ -112,56 +120,48 @@ public class LevelLoader {
 				reader.MoveToAttribute("type");
 				string type = reader.Value;
 
-				string material = "";
+                string material = "";
 				if (reader.GetAttribute ("material") != null) {
-
 					reader.MoveToAttribute("material");
 					material = reader.Value;
-				}
+                }
 					
 				reader.MoveToAttribute("x");
-				float x = (float)Convert.ToDouble(reader.Value);
+				float x = float.Parse(reader.Value, NumberStyles.Any, ci);
 
-				reader.MoveToAttribute("y");
-				float y = (float)Convert.ToDouble(reader.Value);
+                reader.MoveToAttribute("y");
+				float y = float.Parse(reader.Value, NumberStyles.Any, ci);
 
-				float rotation = 0f;
+                float rotation = 0f;
 				if (reader.GetAttribute ("rotation") != null) {
-				
 					reader.MoveToAttribute ("rotation");
-					rotation = (float)Convert.ToDouble (reader.Value);
-				}
+					rotation = float.Parse(reader.Value, NumberStyles.Any, ci);
+                }
 
 				if (nodeName == "Block") {
-
 					level.blocks.Add (new BlockData (type, rotation, x, y, material));
 					reader.Read ();
 				} 
 				else if (nodeName == "Pig") {
-
 					level.pigs.Add (new OBjData (type, rotation, x, y));
 					reader.Read ();
 				}
 				else if (nodeName == "TNT") {
-
 					level.tnts.Add (new OBjData (type, rotation, x, y));
 					reader.Read ();
 				}
 				else if (nodeName == "Platform") {
-
 					float scaleX = 1f;
 					if (reader.GetAttribute ("scaleX") != null) {
-
 						reader.MoveToAttribute ("scaleX");
-						scaleX = (float)Convert.ToDouble (reader.Value);
-					}
+						scaleX = float.Parse(reader.Value, NumberStyles.Any, ci);
+                    }
 
 					float scaleY = 1f;
 					if (reader.GetAttribute ("scaleY") != null) {
-
 						reader.MoveToAttribute ("scaleY");
-						scaleY = (float)Convert.ToDouble (reader.Value);
-					}
+						scaleY = float.Parse(reader.Value, NumberStyles.Any, ci);
+                    }
 
 					level.platforms.Add (new PlatData (type, rotation, x, y, scaleX, scaleY));
 					reader.Read ();

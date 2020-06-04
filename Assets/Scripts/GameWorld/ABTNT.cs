@@ -8,8 +8,8 @@ public class ABTNT : ABGameObject {
 	public float _explosionDamage = 1f;
 	private bool _exploded = false;
 
-	public override void Die(bool withEffect = true)
-	{		
+	public override void Die(bool withEffect = true) {	
+		ABGameWorld.Instance.KillTNT(this);	
 		//ScoreHud.Instance.SpawnScorePoint(200, transform.position);
 		if (!_exploded) {
 			_exploded = true;
@@ -20,13 +20,10 @@ public class ABTNT : ABGameObject {
 	}
 
 	public static void Explode(Vector2 position, float explosionArea, float explosionPower, float explosionDamage, GameObject explosive) {
-
 		Collider2D[] colliders = Physics2D.OverlapCircleAll (position, explosionArea);
 
 		foreach (Collider2D coll in colliders) {
-
 			if (coll.attachedRigidbody && coll.gameObject != explosive && coll.GetComponent<ABBird>() == null) {
-
 				float distance = Vector2.Distance ((Vector2)coll.transform.position, position);
 				Vector2 direction = ((Vector2)coll.transform.position - position).normalized;
 

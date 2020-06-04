@@ -6,6 +6,12 @@ Temp/*
 *.userprefs
 *.userprefs
 *.DS_Store
+*.bytes
 obj/*
 Assets/Experiments/* 
 Website/*
+Assets/Resources/Test/bootstrap*
+Assets/Resources/Test/Levels*
+Assets/Resources/Test/Models* 
+Assets/Resources/Test/Save*  
+Assets/Resources/Test/ScreenShots* 

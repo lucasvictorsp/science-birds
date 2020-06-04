@@ -36,11 +36,10 @@ public class ABBlock : ABGameObject {
 		SetMaterial (_material);
 	}
 	
-	public override void Die(bool withEffect = true)
-	{
-		if(!ABGameWorld.Instance._isSimulation)
+	public override void Die(bool withEffect = true) {
+		//if(!ABGameWorld.Instance._isSimulation)
 			ScoreHud.Instance.SpawnScorePoint(_points, transform.position);
-
+		ABGameWorld.Instance.KillBlock(this);
 		base.Die();
 	}
 

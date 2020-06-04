@@ -109,6 +109,7 @@ public struct SlingData {
 public class ABLevel 
 {
 	public int width;
+    public string name;
 
 	public CameraData camera;
 	public SlingData slingshot;
@@ -124,6 +125,7 @@ public class ABLevel
 	public ABLevel() {
 
 		width = 1;
+        this.name = "";
 
 		pigs      = new List<OBjData>();
 		tnts      = new List<OBjData>();

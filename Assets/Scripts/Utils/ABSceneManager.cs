@@ -17,62 +17,67 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>
 //
 
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using UnityEngine.SceneManagement;
 
-public class ABSceneManager : ABSingleton<ABSceneManager> {
+public class ABSceneManager : ABSingleton<ABSceneManager>
+{
 
-	public delegate void ActionBetweenScenes();
+    public delegate void ActionBetweenScenes();
 
-	public AudioClip _backgroundMusic;
+    public AudioClip _backgroundMusic;
 
-	private string _lastSceneName;
-	public string LastSceneName { get { return _lastSceneName; } }
+    private string _lastSceneName;
+    public string LastSceneName { get { return _lastSceneName; } }
 
-	private int _lastScene;
-	public int LastScene { get { return _lastScene; } }
+    private int _lastScene;
+    public int LastScene { get { return _lastScene; } }
 
-	private string _currentSceneName;
-	public string CurrentSceneName { get { return _currentSceneName; } }
+    private string _currentSceneName;
+    public string CurrentSceneName { get { return _currentSceneName; } }
 
-	private int _currentScene;
-	public int CurrentScene { get { return _currentScene; } }
+    private int _currentScene;
+    public int CurrentScene { get { return _currentScene; } }
 
-	void Start() {
+    void Start()
+    {
 
-		_backgroundMusic = Resources.Load("Audio/title_theme") as AudioClip;
-	}
-			
-	public void LoadScene (string sceneName, bool showLoadingScreen = true, ActionBetweenScenes actioneBetweenScenes = null) {
+        _backgroundMusic = Resources.Load("Audio/title_theme") as AudioClip;
+    }
 
-		ABSceneManager.Instance.StartCoroutine(SceneSwitchCoroutine(sceneName, showLoadingScreen, actioneBetweenScenes));
-	}
+    public void LoadScene(string sceneName, bool showLoadingScreen = true, ActionBetweenScenes actioneBetweenScenes = null)
+    {
+        //Debug.Log("actioneBetweenScenes = " + actioneBetweenScenes);
+        ABSceneManager.Instance.StartCoroutine(SceneSwitchCoroutine(sceneName, showLoadingScreen, actioneBetweenScenes));
+    }
 
-	IEnumerator SceneSwitchCoroutine (string sceneName, bool showLoadingScreen, ActionBetweenScenes actioneBetweenScenes) {
+    IEnumerator SceneSwitchCoroutine(string sceneName, bool showLoadingScreen, ActionBetweenScenes actioneBetweenScenes){
 
-		_lastScene = SceneManager.GetActiveScene ().buildIndex;
-		_lastSceneName = SceneManager.GetActiveScene ().name;
+        _lastScene = SceneManager.GetActiveScene().buildIndex;
+        _lastSceneName = SceneManager.GetActiveScene().name;
 
-		if(showLoadingScreen) 
-			SceneManager.LoadScene("LoadingScene");
+        //if(showLoadingScreen) 
+        //	SceneManager.LoadScene("LoadingScene");
 
-		yield return new WaitForSeconds(0.1f);
+        //yield return new WaitForSeconds(0.01f);
 
-		if (actioneBetweenScenes != null)
-			actioneBetweenScenes();
+        if (actioneBetweenScenes != null)
+            actioneBetweenScenes();
 
-		SceneManager.LoadScene(sceneName);
+        SceneManager.LoadScene(sceneName);
 
-		if (sceneName.EndsWith("Menu")) {
-			if(!ABAudioController.Instance.IsPlayingMusic(_backgroundMusic))
-				ABAudioController.Instance.PlayMusic(_backgroundMusic);
-		}
-		else
-			ABAudioController.Instance.StopMusic();
+        if (sceneName.EndsWith("Menu")) {
+            if (!ABAudioController.Instance.IsPlayingMusic(_backgroundMusic))
+                ABAudioController.Instance.PlayMusic(_backgroundMusic);
+        }
+        else
+            ABAudioController.Instance.StopMusic();
 
-		_currentScene = SceneManager.GetActiveScene ().buildIndex;
-		_currentSceneName = SceneManager.GetActiveScene ().name;
-	}
+        _currentScene = SceneManager.GetActiveScene().buildIndex;
+        _currentSceneName = SceneManager.GetActiveScene().name;
+
+        yield return null;
+    }
 }
 

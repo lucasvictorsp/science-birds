@@ -84,7 +84,7 @@ public class ABConstants {
 	public static readonly int BLOCK_PARTCICLE_PER_SYSTEM    = 25;
 	public static readonly int BLOCK_PARTCICLE_SYSTEM_AMOUNT = 25;
 
-	public static readonly string DEFAULT_LEVELS_FOLDER = "Levels";
+	public static readonly string DEFAULT_LEVELS_FOLDER = "Levels/";
 
 	#if UNITY_STANDALONE_OSX && !UNITY_EDITOR
 
@@ -99,7 +99,7 @@ public class ABConstants {
 	#else 
 
 	public static readonly float  MOUSE_SENSIBILITY = 0.65f;
-	public static readonly string CUSTOM_LEVELS_FOLDER = "/StreamingAssets/Levels";
+	public static readonly string CUSTOM_LEVELS_FOLDER = "/StreamingAssets/Levels/";
 
 	#endif
 }

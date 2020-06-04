@@ -37,7 +37,7 @@ public class LevelList : ABSingleton<LevelList> {
 		return _levels [CurrentIndex]; 
 	}
 
-	public void LoadLevelsFromSource(string[] levelSource, bool shuffle = false) {
+	public void LoadLevelsFromSource(string[] levelSource, string [] levelName, bool shuffle = false) {
 
 		CurrentIndex = 0;
 
@@ -47,19 +47,22 @@ public class LevelList : ABSingleton<LevelList> {
 			ABArrayUtils.Shuffle(levelSource);
 
 		for(int i = 0; i < levelSource.Length; i++)
-			_levels[i] = LevelLoader.LoadXmlLevel(levelSource[i]);
+			_levels[i] = LevelLoader.LoadXmlLevel(levelSource[i], levelName[i]);
 	}
 
 	// Use this for initialization
-	public ABLevel NextLevel() {
+	public ABLevel NextLevel(bool increment) {
 
-		if(CurrentIndex == _levels.Length - 1)
+        if (CurrentIndex == _levels.Length - 1)
 			return null;
 
-		ABLevel level = _levels [CurrentIndex];
-		CurrentIndex++;
+        ABLevel level = null;
+        level = _levels [CurrentIndex];
 
-		return level;
+        if(increment)
+            CurrentIndex++;
+   
+        return level;
 	}
 
 	// Use this for initialization
@@ -73,4 +76,11 @@ public class LevelList : ABSingleton<LevelList> {
 
 		return level;
 	}
+
+    public bool LastNivel(){
+        if (CurrentIndex == (_levels.Length - 1))
+            return true;
+
+        return false;
+    }
 }

@@ -28,7 +28,7 @@ using System.Collections;
 [RequireComponent (typeof (AudioSource))]
 public class ABGameObject : MonoBehaviour
 {	
-	private   float _currentLife;
+	public  float _currentLife;
 
 	protected int   _spriteChangedTimes;
 
@@ -58,23 +58,43 @@ public class ABGameObject : MonoBehaviour
 		IsDying = false;
 	}
 
-	protected virtual void Start() {
-
-	}
+	protected virtual void Start() { }  //necessario a croação do prototipo da função para ser sobrecarregada em ABBird... ABBirdBlack e outros
 
 	protected virtual void Update() {
-
 		DestroyIfOutScreen ();
 	}
 
-	public virtual void Die(bool withEffect = true)
-	{
-		if(!ABGameWorld.Instance._isSimulation && withEffect) {
+    public Collider2D get_Collider() {
+        return this._collider;
+    }
 
+    public SpriteRenderer get_SpriteRenderer() {
+        return this._spriteRenderer;
+    }
+
+    public Rigidbody2D get_RigidBody() {
+        return this._rigidBody;
+    }
+
+    public float getLife() {
+        return this._currentLife;
+    }
+
+    public void setLife(float currentLife_) {
+        this._currentLife = currentLife_;
+    }
+
+    public void restoreCurrentLife(){
+        this._currentLife = this._life;
+    }
+
+	public virtual void Die(bool withEffect = true) {
+		if(!ABGameWorld.Instance._isSimulation && withEffect) {
 			_destroyEffect._shootParticles = true;
 			ABAudioController.Instance.PlayIndependentSFX(_clips[(int)OBJECTS_SFX.DIE]);
 		}
 
+		//dieObject = true;
 		_rigidBody.velocity = Vector2.zero;
 		_spriteRenderer.color = Color.clear;
 		_collider.enabled = false;
@@ -83,12 +103,10 @@ public class ABGameObject : MonoBehaviour
 	}
 
 	private void WaitParticlesAndDestroy() {
-
 		Destroy(gameObject);
 	}
 
-	public virtual void OnCollisionEnter2D(Collision2D collision)
-	{
+	public virtual void OnCollisionEnter2D(Collision2D collision) {
 		DealDamage (collision.relativeVelocity.magnitude);
 	}
 
@@ -110,6 +128,10 @@ public class ABGameObject : MonoBehaviour
 		if(_currentLife <= 0f)
 			Die ();
 	}
+
+    public float getVelocityMagnitude(){
+        return this._rigidBody.velocity.magnitude;
+    }
 
 	void DestroyIfOutScreen() {
 

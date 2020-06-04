@@ -22,11 +22,24 @@ using System.Collections;
 
 public class ABPig : ABCharacter {
 
-	public override void Die(bool withEffect = true)
-	{
-		ScoreHud.Instance.SpawnScorePoint(50, transform.position);
+	public override void Die(bool withEffect = true) {
+        //if(!ABGameWorld.Instance._isSimulation)
+		    ScoreHud.Instance.SpawnScorePoint(50, transform.position);
 		ABGameWorld.Instance.KillPig(this);
 
 		base.Die(withEffect);
 	}
+
+    /*public void Update() {
+        //Debug.Log("(" + this.transform.position.x + this.transform.position.y + "), _currentLife" + _currentLife);
+        //Debug.Log(this._collider.bounds.size.y);
+    }//*/
+
+    /*public override void DieNotDestroy() {
+        ScoreHud.Instance.SpawnScorePoint(50, transform.position);
+        //ABGameWorld.Instance.KillPigNotDestroy(this);
+        ABGameWorld.Instance.KillPigNoDestroy(this);
+        //ABGameWorld.Instance.KillPigNoDestroy2(this);
+        base.DieNotDestroy();
+    }//*/
 }
