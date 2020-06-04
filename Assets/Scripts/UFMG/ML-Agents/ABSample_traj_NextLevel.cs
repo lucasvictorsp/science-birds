@@ -177,7 +177,7 @@ public class ABSample_traj_NextLevel : MonoBehaviour {
     }
 
     public static void salveDateEst() {
-        m_sw5 = File.AppendText(Application.dataPath + "/Resources/Test/bootstrap/est_82_22.tx");
+        m_sw5 = File.AppendText(Application.dataPath + "/Resources/Test/bootstrap/est_82_22.txt");
         m_sw5.Write(LevelList.Instance.GetCurrentLevel().name + "    " + HUD.Instance.tempoAcelerado().ToString() + "    " + LevelList.Instance.CurrentIndex.ToString() + "    " + Time.realtimeSinceStartup.ToString() + "    " + contInstable + "    " + contSol + "    " + contNotSol + "\n");
         m_sw5.Close();
     }
@@ -515,10 +515,10 @@ public class ABSample_traj_NextLevel : MonoBehaviour {
                 m_sw3.Write("\n");
                 m_sw3.Close();
 
-                m_sw3 = File.AppendText(Application.dataPath + "/Resources/Test/bootstrap/BootstrapTimer_82_22");
+                m_sw3 = File.AppendText(Application.dataPath + "/Resources/Test/bootstrap/BootstrapTimer_82_22.txt");
 
                 //m_sw4 = File.AppendText(Application.dataPath + "/Resources/Test/bootstrap/BootstrapBirds");
-                m_sw4 = File.AppendText(Application.dataPath + "/Resources/Test/bootstrap/BootstrapBirds_82_22");
+                m_sw4 = File.AppendText(Application.dataPath + "/Resources/Test/bootstrap/BootstrapBirds_82_22.txt");
 
                 for (int iterSolutuion = 0; iterSolutuion <= deph; iterSolutuion++) {;
                     m_sw1.Write("(" + iterSolutuion + ", " + angleAlredyChoice[iterSolutuion].get_angle() + ") ");
