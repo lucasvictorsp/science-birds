@@ -6,15 +6,18 @@ using UnityEngine;
 public class DefineLaunch {
     private int _angle;
     private float _timeAttackAbility;
+    private bool _usedSpecialAttackUnity;
 
-    public DefineLaunch(int _angle_ = -36, float _timeAttackAbility_ = 0.0f) {
+    public DefineLaunch(int _angle_ = -36, float _timeAttackAbility_ = 0.0f, bool _usedSpecialAttackUnity_ = false) {
         this._angle = _angle_;
         this._timeAttackAbility = _timeAttackAbility_;
+        this._usedSpecialAttackUnity = _usedSpecialAttackUnity_;
     }
 
     public DefineLaunch(ref DefineLaunch w) {
         this._angle = w._angle;
         this._timeAttackAbility = w._timeAttackAbility;
+        this._usedSpecialAttackUnity = w._usedSpecialAttackUnity;
     }
 
     public int get_angle() {
@@ -25,6 +28,10 @@ public class DefineLaunch {
         return this._timeAttackAbility;
     }
 
+    public bool get_usedSpecialAttackUnity() {
+        return this._usedSpecialAttackUnity;
+    }
+
     public void set_angle(ref int _angle_) {
         this._angle = _angle_;
     }
@@ -33,16 +40,21 @@ public class DefineLaunch {
         this._timeAttackAbility = _timeAttackAbility_;
     }
 
+    public void set_usedSpecialAttackUnity(bool _usedSpecialAttackUnity_) {
+        this._usedSpecialAttackUnity = _usedSpecialAttackUnity_;
+    }
+
     public bool SameObject(ref DefineLaunch d) {
         if (this._angle != d.get_angle()) {
             return false;
         } else if(this._timeAttackAbility != d.get_timeAttackAbility()) {
             return false;
+        } else if (this._usedSpecialAttackUnity != d.get_usedSpecialAttackUnity()) {
+            return false;
         }
 
         return true;
     }
-
 }
 
 public class ChildrenState {
@@ -73,15 +85,15 @@ public class ChildrenState {
 
 //public class ABStateNivelUnity : MonoBehaviour {
 public class ABStateNivelUnity {
-    private static int numChildrenAngle = 82;
+    private static int numChildrenAngle = 75;
     private static int numChildrenTime = 22;
 
     public static int img_height = 480;
     public static int img_width = 840;
     public static int img_heightRNA = 106;      //132;   // 264;   // 300;
-    public static int img_widthRNA = 190;       //237;    // 474;   // 500;
+    public static int img_widthRNA = 159;         // 190;       // 237;    // 474;   // 500;
     public static int img_heightRNAFinal = 351;
-    public static int img_widthRNABegin = 224;
+    public static int img_widthRNABegin = 300;      // 224;
     public static int img_heightRNABeginl = 87;
     public static int img_widthRNAFinal = 697;
 
@@ -90,7 +102,7 @@ public class ABStateNivelUnity {
     //public static int numChildren = 127;
     //public static int numChildren = 254;
     //public static int numChildren = 256;
-    public static int numChildren = 1804; //82*22
+    public static int numChildren = 75;  //15*5 // 1804; //82*22
     //public static int numChildren = 75;
 
     public int highTree { get; set; }
@@ -99,13 +111,16 @@ public class ABStateNivelUnity {
     public int highTreeInverted;
     public double probability;
     public List<ChildrenState> statChildren;
+    public ChildrenState choice_;
+    public int posChoice_;
     public double sumProbabilityChildren;
     public float[,,,] matrix;
     public float[,,] numBirds;
     public bool recortFrame { get; set; }
-    private static ABRandomGenerator rdm;
+    private static ABRandomGenerator rdm = new ABRandomGenerator();
+    //public ulong sumTimeVezesCalled;
 
-    public ABStateNivelUnity(int highTree_ = 0, ulong numTimesChoiceMax_ = 0, int highTreeInverted_ = -1, double probability_ = 0.0, double sumProbabilityChildren_ = 1.0, ABStateNivelUnity father_ = null, bool recortFrame_ = false, int numFunction_ml_ = -1) {
+    public ABStateNivelUnity(int highTree_ = 0, ulong numTimesChoiceMax_ = 0, int highTreeInverted_ = -1, double probability_ = 0.0, ChildrenState _choice_ = null, int _posChoice_ = -1, double sumProbabilityChildren_ = 1.0, ABStateNivelUnity father_ = null, bool recortFrame_ = false, int numFunction_ml_ = -1, ulong sumTimeVezesCalled_ = 0) {
         this.highTree = highTree_;
         if (this.highTree > 0) {
             //this.wayAngleOrFunction = new int[this.highTree];
@@ -117,6 +132,8 @@ public class ABStateNivelUnity {
         this.highTreeInverted = highTreeInverted_;
         this.probability = probability_;
         this.statChildren = new List<ChildrenState>();    //this.statChildren = new ChildrenState[numChildren];
+        this.choice_ = _choice_;
+        this.posChoice_ = _posChoice_;
         this.sumProbabilityChildren = sumProbabilityChildren_;
         this.matrix = new float[1, img_heightRNA, img_widthRNA, 6];
         numBirds = new float[1, 10, 5];  // new float[1, 5, 7];
@@ -133,7 +150,7 @@ public class ABStateNivelUnity {
         //    }
         //}
         this.recortFrame = recortFrame_;
-        rdm = new ABRandomGenerator();
+        //this.sumTimeVezesCalled = sumTimeVezesCalled_;
     }
 
     public ABStateNivelUnity(ABStateNivelUnity stat) {
@@ -150,10 +167,12 @@ public class ABStateNivelUnity {
         this.numTimesChoiceMax = stat.numTimesChoiceMax;
         this.highTreeInverted = stat.highTreeInverted;
         this.probability = stat.probability;
-        this.statChildren = new List<ChildrenState>();
-        for (int i = 0; i < numChildren; i++) {
-            this.statChildren.Add(new ChildrenState(stat.statChildren[i]));
-        }
+        this.statChildren = new List<ChildrenState>(stat.statChildren);
+        choice_ = new ChildrenState(stat.choice_);
+        this.posChoice_ = stat.posChoice_;
+        //for (int i = 0; i < numChildren; i++) {
+        //    this.statChildren.Add(new ChildrenState(stat.statChildren[i]));
+        //}
         this.sumProbabilityChildren = stat.sumProbabilityChildren;
         this.matrix = new float[1, img_heightRNA, img_widthRNA, 6];
         for (int i = 0; i < img_heightRNA; i++) {
@@ -163,20 +182,22 @@ public class ABStateNivelUnity {
                 }
             }
         }
+
         numBirds = new float[1, 10, 5];  //  new float[1, 5, 7];
         for (int j = 0; j < 10; j++)
             for (int i = 0; i < 5; i++)
-                this.numBirds[0, 0, i] = stat.numBirds[0, j, i];
+                this.numBirds[0, j, i] = stat.numBirds[0, j, i];
 
         //numBirds = new float[1, 5, 7];  //  new float[1, 5, 7];
         //for (int j = 0; j < 5; j++)
         //    for (int i = 0; i < 7; i++)
         //        this.numBirds[0, 0, i] = stat.numBirds[0, j, i];
         this.recortFrame = stat.recortFrame;
-        rdm = new ABRandomGenerator();
+        //this.sumTimeVezesCalled = stat.sumTimeVezesCalled;
     }
 
-    public void inicializaChildernProbability(ref float [,] resultEvatuateAngle_, ref float[,] resultEvatuateTime_) {
+    //public void inicializaChildernProbability(ref float [,] resultEvatuateAngle_, ref float[,] resultEvatuateTime_, ref ABBird b) {
+    public void inicializaChildernProbability(ref float [,] resultEvatuateAngle_, ref float[,] resultEvatuateTime_, string sType) {
         this.statChildren.Clear();
 
         //for (int j = 0; j < numChildrenTime; j++) {
@@ -187,20 +208,25 @@ public class ABStateNivelUnity {
         //}
 
         //float yyy = 0;
-
-        for (int i = 0; i < numChildrenAngle; i++) {
-	        for (int j = 0; j < numChildrenTime; j++) {
-                if (j > 0) {
-                    //this.statChildren.Add(new ChildrenState(resultEvatuate_[0, i], (-35 +  i)));
-                    this.statChildren.Add(new ChildrenState((resultEvatuateAngle_[0, i] * resultEvatuateTime_[0, j]), (-6 + i), (0.6f + (j * 0.1f))));
-                    //yyy += (resultEvatuateAngle_[0, i] * resultEvatuateTime_[0, j]);
-                } else {
-                    this.statChildren.Add(new ChildrenState((resultEvatuateAngle_[0, i] * resultEvatuateTime_[0, j]), (-6 + i), -1));
+        //if (b.typeBird == "BirdRed") {
+        if (sType == "BirdRed") {
+            for (int i = 0; i < numChildrenAngle; i++)
+                this.statChildren.Add(new ChildrenState(resultEvatuateAngle_[0, i], (-6 + i), -1));
+            //this.sumTimeVezesCalled = (ulong)numChildrenTime;
+        }  else {
+            for (int i = 0; i < numChildrenAngle; i++) {
+                for (int j = 0; j < numChildrenTime; j++) {
+                    if (j > 0) {
+                        //this.statChildren.Add(new ChildrenState(resultEvatuate_[0, i], (-35 +  i)));
+                        this.statChildren.Add(new ChildrenState((resultEvatuateAngle_[0, i] * resultEvatuateTime_[0, j]), (-6 + i), (0.4f + (j * 0.1f))));
+                        //yyy += (resultEvatuateAngle_[0, i] * resultEvatuateTime_[0, j]);
+                    } else {
+                        this.statChildren.Add(new ChildrenState((resultEvatuateAngle_[0, i] * resultEvatuateTime_[0, j]), (-6 + i), -1));
+                    }
                 }
             }
-    	}
-
-        //Debug.Log("yyy = " + yyy);
+            //this.sumTimeVezesCalled = 1;
+        }
 
         //this.orderStatChildren();
         this.sumProbabilityChildren = 1.0;
@@ -394,43 +420,88 @@ public class ABStateNivelUnity {
         return randomsInRange;
     }//*/
 
-    public int choiceAngleSemProbability(ref DefineLaunch _dLaunch) {
-        /*Int64 posElem;
-        using (System.Security.Cryptography.RNGCryptoServiceProvider rg = new System.Security.Cryptography.RNGCryptoServiceProvider()) {
-            byte[] rno = new byte[4];
-            while (true) {
-                rg.GetBytes(rno);
-                Int64 diff = this.statChildren.Count;
-                Int64 max = (1 + (Int64)UInt32.MaxValue);
-                Int64 remainder = max % diff;
-                Int64 randomvalue = BitConverter.ToInt32(rno, 0);
-                if (randomvalue < (max - remainder)) {
-                    //return randomvalue;
-                    posElem = (randomvalue % diff);
-                    break;
-                }
-            }
-        }//*/
-        /*Debug.Log("trtrrrrrrrrrrrrrrr");
-        System.Security.Cryptography.RNGCryptoServiceProvider RNG = new System.Security.Cryptography.RNGCryptoServiceProvider();
-        byte[] bytes = new byte[4];
-        int result = 0;
-        Debug.Log("trtrrrrrrrrrrrrrrr-1");
-        do {
-            Debug.Log("trtrrrrrrrrrrrrrrr-2");
-            RNG.GetBytes(bytes);
-            result = BitConverter.ToInt32(bytes, result);
-        } while ((result <= 0) || (result >= this.statChildren.Count));
-        Debug.Log("trtrrrrrrrrrrrrrrr-3");//*/
+    /*public void choiceAngleSemProbability() {
+        //Int64 posElem;
+        //using (System.Security.Cryptography.RNGCryptoServiceProvider rg = new System.Security.Cryptography.RNGCryptoServiceProvider()) {
+        //    byte[] rno = new byte[4];
+        //    while (true) {
+        //        rg.GetBytes(rno);
+        //        Int64 diff = this.statChildren.Count;
+        //        Int64 max = (1 + (Int64)UInt32.MaxValue);
+        //        Int64 remainder = max % diff;
+        //        Int64 randomvalue = BitConverter.ToInt32(rno, 0);
+        //        if (randomvalue < (max - remainder)) {
+        //            //return randomvalue;
+        //            posElem = (randomvalue % diff);
+        //            break;
+        //        }
+        //    }
+        //}/////////////////////////////
+
+        //Debug.Log("trtrrrrrrrrrrrrrrr");
+        //System.Security.Cryptography.RNGCryptoServiceProvider RNG = new System.Security.Cryptography.RNGCryptoServiceProvider();
+        //byte[] bytes = new byte[4];
+        //int result = 0;
+        //Debug.Log("trtrrrrrrrrrrrrrrr-1");
+        //do {
+        //    Debug.Log("trtrrrrrrrrrrrrrrr-2");
+        //    RNG.GetBytes(bytes);
+        //    result = BitConverter.ToInt32(bytes, result);
+        //} while ((result <= 0) || (result >= this.statChildren.Count));
+        //Debug.Log("trtrrrrrrrrrrrrrrr-3");//////////////////
 
         //int result = UnityEngine.Random.Range(0, this.statChildren.Count);
+
         int result = rdm.Next(0, this.statChildren.Count);
 
         //Debug.Log("this.statChildren.Count = " + this.statChildren.Count + ", result = " + result);
-        _dLaunch = this.statChildren[result].dLauch;//*/
+        //_dLaunch = this.statChildren[result].dLauch;
 
-        return result;
+        //this.choice_ = this.statChildren[result];
+        this.choice_ = new ChildrenState(this.statChildren[result]);
+
+
+
+        //return result;
     }//*/
+
+    public void choiceAngleBacktrackingWithOutProBability() {
+        this.choice_ = new ChildrenState(this.statChildren[(this.statChildren.Count - 1)]);
+        this.posChoice_ = (this.statChildren.Count - 1);
+        //this.statChildren[(this.statChildren.Count - 1)].numTimesChoice += this.sumTimeVezesCalled;
+        //if (this.statChildren[(this.statChildren.Count - 1)].numTimesChoice == this.numTimesChoiceMax) {
+        //    this.sumProbabilityChildren -= this.statChildren[(this.statChildren.Count - 1)].probabilityChildren;
+        //    this.statChildren.Remove(this.statChildren[(this.statChildren.Count - 1)]);
+        //}
+    }
+    
+    
+    public void choiceAngleSemProbability() {
+        //Debug.Log("this.statChildren.Count = " + this.statChildren.Count);
+        int result = rdm.Next(0, this.statChildren.Count);
+        //Debug.Log("result = " + result);
+
+        this.choice_ = new ChildrenState(this.statChildren[result]);
+
+        //return result;
+
+        this.posChoice_ = result;
+
+        //this.statChildren[result].numTimesChoice++;
+        //if (this.statChildren[result].numTimesChoice == this.numTimesChoiceMax) {
+        //    this.sumProbabilityChildren -= this.statChildren[result].probabilityChildren;
+        //    this.statChildren.Remove(this.statChildren[result]);
+        //}
+
+    }//*/
+
+    /*public void incrementNumTimesChoice() {
+        this.choice_.numTimesChoice++;
+        if (this.choice_.numTimesChoice == this.numTimesChoiceMax) {
+            this.sumProbabilityChildren -= this.choice_.probabilityChildren;
+            this.statChildren.Remove(this.choice_);
+        }
+    }
 
     public void incrementNumTimesChoice(ref int posIncrement) {
         this.statChildren[posIncrement].numTimesChoice++;
@@ -438,9 +509,11 @@ public class ABStateNivelUnity {
             this.sumProbabilityChildren -= this.statChildren[posIncrement].probabilityChildren;
             this.statChildren.Remove(this.statChildren[posIncrement]);
         }
-    }
+    }//*/
 
     public bool isStatChildrenEmpty() {
+        //if (this.statChildren == null)
+        //    return true;
         return this.statChildren.Count == 0;
     }
 
@@ -455,6 +528,26 @@ public class ABStateNivelUnity {
 
         this.highTreeInverted = numMaxBird - this.highTree;
         this.numTimesChoiceMax = ((ulong)Mathf.Pow(((ulong)numChildren), (this.highTreeInverted - 1)));
+    }
+
+    public void printVectorBirds() {
+        string tTemp;
+        for (int j = 0; j < 10; j++) {
+            tTemp = "";
+            for (int i = 0; i < 5; i++) {
+                //Debug.Log(this.numBirds[0, j, i]);
+                //Debug.Log(" ");
+                tTemp += this.numBirds[0, j, i] + " ";
+            }
+            //Debug.Log("\n");
+            Debug.Log("tTemp = " + tTemp);
+        }
+    }
+
+    public void RemoveSpecialAttackNeverUse() {
+        for (int i = (this.statChildren.Count - 1); i > -1; i--)
+            if ((this.statChildren[i].dLauch.get_angle() == this.choice_.dLauch.get_angle()) && ((this.statChildren[i].dLauch.get_timeAttackAbility() > this.choice_.dLauch.get_timeAttackAbility())))
+                this.statChildren.Remove(this.statChildren[i]);
     }
 
     private void positionBirdsInArrayNumBirds(string typeBird_, int pos) {

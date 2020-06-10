@@ -10,7 +10,7 @@ public class ABTNT : ABGameObject {
 
 	public override void Die(bool withEffect = true) {	
 		ABGameWorld.Instance.KillTNT(this);	
-		//ScoreHud.Instance.SpawnScorePoint(200, transform.position);
+		ScoreHud.Instance.SpawnScorePoint(200, transform.position);
 		if (!_exploded) {
 			_exploded = true;
 			Explode (transform.position, _explosionArea, _explosionPower, _explosionDamage, gameObject);

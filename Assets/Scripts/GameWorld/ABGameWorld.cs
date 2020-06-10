@@ -106,53 +106,69 @@ public class ABGameWorld : ABSingleton<ABGameWorld> {
 	}
 
 	// Use this for initialization
-	void Start () {
-		_levelCleared = false;
+    void Start() {
+        /*testeApagaGar = new double[10];
+        testeApagaGar[0] = 0.00005;
+        testeApagaGar[1] = 0.0025;
+        testeApagaGar[2] = .0035;
+        testeApagaGar[3] = .006;
+        testeApagaGar[4] = .012;
+        testeApagaGar[5] = .02;
+        testeApagaGar[6] = .03;
+        testeApagaGar[7] = .15;
+        testeApagaGar[8] = .35;
+        testeApagaGar[9] = 1;//*/
+        //alreadyAdaptCamera = false;
 
-		if(!_isSimulation) {
+        //Instantiate (teste, new Vector3(1, 0, 0), Quaternion.identity);
+        //backgroundRead = true;
 
-			GetComponent<AudioSource>().PlayOneShot(_clips[0]);
-			GetComponent<AudioSource>().PlayOneShot(_clips[1]);
-		}
+        /*numBirdsRed = 0;
+        numBirdsYellow = 0;
+        numBirdsWhite = 0;
+        numBirdsBlack = 0;
+        numBirdsBlue = 0;//*/
 
-		GameObject slingshot = GameObject.Find ("Slingshot");
+        _birdTrajectory = new List<ABParticle>();
 
-		// If there are objects in the scene, use them to play
-		if (_blocksTransform.childCount     > 0 || _birdsTransform.childCount > 0 || 
-			_plaftformsTransform.childCount > 0 || slingshot != null ) {
+        _levelCleared = false;
 
-			foreach(Transform bird in _birdsTransform)
-				AddBird (bird.GetComponent<ABBird>());
+        if (!_isSimulation) {
+            GetComponent<AudioSource>().PlayOneShot(_clips[0]);
+            GetComponent<AudioSource>().PlayOneShot(_clips[1]);
+        }
 
-			foreach (Transform block in _blocksTransform) {
+        // If there are objects in the scene, use them to play
+        if (_blocksTransform.childCount > 0 || _birdsTransform.childCount > 0) {
+            foreach (Transform bird in _birdsTransform)
+                AddBird(bird.GetComponent<ABBird>());
 
-				ABPig pig = block.GetComponent<ABPig>();
-				if(pig != null)
-					_pigs.Add(pig);
-			}
+            foreach (Transform block in _blocksTransform) {
+                ABPig pig = block.GetComponent<ABPig>();
+                if (pig != null)
+                    _pigs.Add(pig);
+            }
 
-			LevelHeight = ABConstants.LEVEL_ORIGINAL_SIZE.y;
-			LevelWidth = ABConstants.LEVEL_ORIGINAL_SIZE.x;
+        } else {
+            ABLevel currentLevel = LevelList.Instance.GetCurrentLevel();
 
-			_slingshot = GameObject.Find ("Slingshot");
-		} 
-		else {
-			
-			ABLevel currentLevel = LevelList.Instance.GetCurrentLevel ();
+            if (currentLevel != null) {
+                DecodeLevel(currentLevel);
+                //AdaptCameraWidthToLevel();
 
-			if (currentLevel != null) {
-				
-				DecodeLevel (currentLevel);
-				AdaptCameraWidthToLevel ();
+                _levelTimesTried = 0;
 
-				_levelTimesTried = 0;
-			}
-		}
+                _slingshotBaseTransform = GameObject.Find("slingshot_base").transform;
+            }
+        }
 
-		_slingshotBaseTransform = GameObject.Find ("slingshot_base").transform;
-	}
+        //if (checkStableLevel)
+        //    StartCoroutine(checkstableLevel());
+        //else
+        //    levelStable = true;
+    }
 
-	public void DecodeLevel(ABLevel currentLevel) {
+    public void DecodeLevel(ABLevel currentLevel) {
         ClearWorld();
 
         totalObjectsIniLevel = 0;
@@ -359,7 +375,7 @@ public class ABGameWorld : ABSingleton<ABGameWorld> {
 		return null;
 	}
 
-	public void NextLevel(bool increment = true) {
+    public void NextLevel(bool increment = true) {
         if (increment)
             checkStableLevel = true;
         else
@@ -378,17 +394,19 @@ public class ABGameWorld : ABSingleton<ABGameWorld> {
         }
     }
 
-	public void ResetLevel() {
-		
-		if(_levelFailedBanner.activeSelf)
-			_levelTimesTried++;
+    public void ResetLevel() {
+        if (_levelFailedBanner.activeSelf)
+            _levelTimesTried++;
 
-		ABSceneManager.Instance.LoadScene(SceneManager.GetActiveScene().name);
-	}
+        ABSceneManager.Instance.LoadScene(SceneManager.GetActiveScene().name);
+    }
 
-	public void AddTrajectoryParticle(ABParticle trajectoryParticle) {
 
-		_birdTrajectory.Add (trajectoryParticle);
+    public void AddTrajectoryParticle(ABParticle trajectoryParticle) {
+        if (_birdTrajectory == null)
+            _birdTrajectory = new List<ABParticle>();
+
+        _birdTrajectory.Add (trajectoryParticle);
 	}
 
 	public void RemoveLastTrajectoryParticle() {
@@ -493,47 +511,36 @@ public class ABGameWorld : ABSingleton<ABGameWorld> {
         return newGameObject;
     }
 
-    private void ShowLevelFailedBanner()  {
-		
-		if(_levelCleared)
-			return;
+    private void ShowLevelFailedBanner() {
+        if (_levelCleared)
+            return;
 
-		if(!IsLevelStable()) {
+        //wonGame = -1;
+        if (!IsLevelStable())
+            Invoke("ShowLevelFailedBanner", 1f);
+        else {
+            // Player lost the game
+            HUD.Instance.gameObject.SetActive(false);
+            if (_levelTimesTried < _timesToGiveUp - 1)
+                _levelFailedBanner.SetActive(true);
+            else {
+                _levelClearedBanner.SetActive(true);
+                _levelClearedBanner.GetComponentInChildren<Text>().text = "Level Failed!";
+            }
+        }
+    }
 
-			Invoke("ShowLevelFailedBanner", 1f);
-		}
-		else {
-			
-			// Player lost the game
-			HUD.Instance.gameObject.SetActive(false);
-
-			if (_levelTimesTried < _timesToGiveUp - 1) {
-
-				_levelFailedBanner.SetActive (true);
-			}
-			else {
-				
-				_levelClearedBanner.SetActive(true);
-				_levelClearedBanner.GetComponentInChildren<Text>().text = "Level Failed!";
-			}
-		}
-	}
-
-	private void ShowLevelClearedBanner() 
-	{
-		if(!IsLevelStable()) {
-
-			Invoke("ShowLevelClearedBanner", 1f);
-		}
-		else {
-			
-			// Player won the game
-			HUD.Instance.gameObject.SetActive(false);
-
-			_levelClearedBanner.SetActive(true);
-			_levelClearedBanner.GetComponentInChildren<Text>().text = "Level Cleared!";
-		}
-	}
+    private void ShowLevelClearedBanner() {
+        //wonGame = 1;
+        if (!IsLevelStable())
+            Invoke("ShowLevelClearedBanner", 1f);
+        else {
+            // Player won the game
+            HUD.Instance.gameObject.SetActive(false);
+            _levelClearedBanner.SetActive(true);
+            _levelClearedBanner.GetComponentInChildren<Text>().text = "Level Cleared!";
+        }
+    }
 
 	public void KillPig(ABPig pig) {
 		
@@ -633,23 +640,17 @@ public class ABGameWorld : ABSingleton<ABGameWorld> {
 	}
 
 	public int GetPigsAvailableAmount() {
-		
 		return _pigs.Count;
 	}
 	
 	public int GetBirdsAvailableAmount() {
-		
 		return _birds.Count;
 	}
 
 	public int GetBlocksAvailableAmount() {
-		
 		int blocksAmount = 0;
-
 		foreach(Transform b in _blocksTransform) {
-			
 			if(b.GetComponent<ABPig>() == null)
-			
 				for(int i = 0; i < b.GetComponentsInChildren<Rigidbody2D>().Length; i++)
 					blocksAmount++;
 		}
@@ -811,45 +812,46 @@ public class ABGameWorld : ABSingleton<ABGameWorld> {
 		return objsInScene;
 	}
 
-	public Vector3 DragDistance() {
+    public Vector3 DragDistance() {
+        Vector3 selectPos = (_slingshot.transform.position - ABConstants.SLING_SELECT_POS);
+        //Debug.Log(_slingshotBaseTransform.transform.position - selectPos);
+        return _slingshotBaseTransform.transform.position - selectPos;
+    }
 
-		Vector3 selectPos = (_slingshot.transform.position - ABConstants.SLING_SELECT_POS);
-		return _slingshotBaseTransform.transform.position - selectPos;
-	}
+    public void SetSlingshotBaseActive(bool isActive) {
+        _slingshotBaseTransform.gameObject.SetActive(isActive);
+    }
 
-	public void SetSlingshotBaseActive(bool isActive) {
+    public void ChangeSlingshotBasePosition(Vector3 position) {
+        _slingshotBaseTransform.transform.position = position;
+    }
 
-		_slingshotBaseTransform.gameObject.SetActive(isActive);
-	}
+    public void ChangeSlingshotBaseRotation(Quaternion rotation) {
 
-	public void ChangeSlingshotBasePosition(Vector3 position) {
+        _slingshotBaseTransform.transform.rotation = rotation;
+    }
 
-		_slingshotBaseTransform.transform.position = position;
-	}
+    public bool IsSlingshotBaseActive()  {
 
-	public void ChangeSlingshotBaseRotation(Quaternion rotation) {
+        return _slingshotBaseTransform.gameObject.activeSelf;
+    }
 
-		_slingshotBaseTransform.transform.rotation = rotation;
-	}
+    public Vector3 GetSlingshotBasePosition() {
 
-	public bool IsSlingshotBaseActive() {
+        return _slingshotBaseTransform.transform.position;
+    }
 
-		return _slingshotBaseTransform.gameObject.activeSelf;
-	}
+    public void StartWorld() {
+        //wonGame = 0;
+        _pigsAtStart = GetPigsAvailableAmount();
+        _birdsAtStart = GetBirdsAvailableAmount();
+        _blocksAtStart = GetBlocksAvailableAmount();
+        //stateCurrent = new StateNivelUnity();
 
-	public Vector3 GetSlingshotBasePosition() {
+        //ABLevinTS2.Instance.creatListObjects();
+    }
 
-		return _slingshotBaseTransform.transform.position;
-	}
-
-	public void StartWorld() {
-		//wonGame = 0;
-		_pigsAtStart = GetPigsAvailableAmount();
-		_birdsAtStart = GetBirdsAvailableAmount();
-		_blocksAtStart = GetBlocksAvailableAmount();
-	}
-
-	public void ClearWorld() {
+    public void ClearWorld() {
         if (_slingshotBaseTransform != null)
             foreach (Transform s in _slingshotBaseTransform)
                 Destroy(s.gameObject);
@@ -888,7 +890,8 @@ public class ABGameWorld : ABSingleton<ABGameWorld> {
 
     }
 
-    public void AdaptCameraWidthToLevel(){
+    public void AdaptCameraWidthToLevel() {
+
         Collider2D[] bodies = _blocksTransform.GetComponentsInChildren<Collider2D>();
 
         if (bodies.Length == 0)
@@ -917,8 +920,7 @@ public class ABGameWorld : ABSingleton<ABGameWorld> {
                 maxPosY = maxPosYCandidate;
         }
 
-        float cameraWidth = Mathf.Abs(minPosX - levelLeftBound) +
-            Mathf.Max(Mathf.Abs(maxPosX - minPosX), Mathf.Abs(maxPosY - groundSurfacePos)) + 0.5f;
+        float cameraWidth = Mathf.Abs(minPosX - levelLeftBound) + Mathf.Max(Mathf.Abs(maxPosX - minPosX), Mathf.Abs(maxPosY - groundSurfacePos)) + 0.5f;
 
         GameplayCam.SetCameraWidth(cameraWidth);
         //alreadyAdaptCamera = true;

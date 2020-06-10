@@ -203,11 +203,11 @@ public class HUD : ABSingleton<HUD>
     public void ClickDown_1() {
         ABSample_traj_NextLevel.salveDateEst();
 
-        /*ABSample_traj_NextLevel_5.m_sw.Flush();
-        ABSample_traj_NextLevel_5.m_sw1.Flush();
-        ABSample_traj_NextLevel_5.m_sw2.Flush();
-        ABSample_traj_NextLevel_5.m_sw3.Flush();
-        ABSample_traj_NextLevel_5.m_sw4.Flush();//*/
+        /*ABSample_traj_NextLevel.m_sw.Flush();
+        ABSample_traj_NextLevel.m_sw1.Flush();
+        ABSample_traj_NextLevel.m_sw2.Flush();
+        ABSample_traj_NextLevel.m_sw3.Flush();
+        ABSample_traj_NextLevel.m_sw4.Flush();//*/
 
         Debug.Log("Time.realtimeSinceStartup - (tempo até o click - \"até agora\") = " + Time.realtimeSinceStartup);
         Debug.Log("Time game HUD= " + (Time.time - timeStartGameHUD));
